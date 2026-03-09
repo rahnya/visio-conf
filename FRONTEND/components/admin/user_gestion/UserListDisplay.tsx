@@ -45,12 +45,13 @@ export default function UserListDisplay ({
                 </div>
 
                 <button
-                    onClick={() => setCreateUser(true)}
-                    style={{backgroundColor:"#223A6A"}}
+                    onClick={() => {
+                        if (userPerms.includes("admin_ajouter_utilisateur")) setCreateUser(true);
+                    }}
+                    style={{backgroundColor: userPerms.includes("admin_ajouter_utilisateur") ? "#223A6A" : "gray"}}
                     className={styles.addButton}
                     >
-                    + Ajouter
-                </button>
+                    + Ajouter</button>
             </div>
 
             <TextField 
