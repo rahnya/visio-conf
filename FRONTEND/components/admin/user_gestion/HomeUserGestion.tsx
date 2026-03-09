@@ -9,8 +9,10 @@ import CustomSnackBar from "../../SnackBar";
 import UserListDisplay from "./UserListDisplay";
 import { User } from "@/types/User";
 import UpdateUserRole from "./UpdateUserRole";
+import CreateUser from "./CreateUser";
 
 export default function HomeUserGestion ({userPerms} : {userPerms : string[]}) {
+    const [createUser, setCreateUser] = useState<boolean>(false);
     const [regex, setRegex] = useState<string>("");
     const [userList, setUserList] = useState<User[]>();
     const [selectedUser, setSelectedUser] = useState<any>();
@@ -75,13 +77,25 @@ export default function HomeUserGestion ({userPerms} : {userPerms : string[]}) {
                 controleur.desincription(handler,listeMessageEmis,listeMessageRecus)
             }
         }
-    }, [router, controleur, canal])
+    }, [controleur, canal])
 
     useEffect(() => {
         controleur.envoie(handler, {
             "users_list_request" : 1
         })
-    }, [openChangeStatus, updateUser])
+    }, [openChangeStatus, updateUser, createUser])
+
+    useEffect(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7739/ingest/51bf1159-6779-4d92-b62b-5213cc03670d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'22d832'},body:JSON.stringify({sessionId:'22d832',location:'HomeUserGestion.tsx:viewState',message:'HomeUserGestion view state',data:{createUser,updateUser},runId:'pre-fix',hypothesisId:'H7',timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+    }, [createUser, updateUser]);
+
+    useEffect(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7739/ingest/51bf1159-6779-4d92-b62b-5213cc03670d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'22d832'},body:JSON.stringify({sessionId:'22d832',location:'HomeUserGestion.tsx:createUserEffect',message:'createUser state changed',data:{createUser},runId:'pre-fix',hypothesisId:'H2',timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+    }, [createUser])
 
     useEffect(() => {
         setRows([]);
@@ -101,7 +115,7 @@ export default function HomeUserGestion ({userPerms} : {userPerms : string[]}) {
                     desc : user.desc,
                     status: user.status === "active" ? "Actif" :
                     (user.status === "waiting" ? "En attente" : "Désactivé"),
-                    roles : user.roles
+                    roles : user.roles.map((r:any) => r._id)
                 })
             }
         })
@@ -201,23 +215,27 @@ export default function HomeUserGestion ({userPerms} : {userPerms : string[]}) {
     ];
 
     const handleChangeStatus = () => {
+        console.log("ACTION", action)
+        console.log("USER", selectedUser)
+       
         controleur.envoie(handler, {
-            "update_user_status_request" : {
-                user_id : selectedUser.id,
-                action : action
-            }
+          "update_user_status_request" : {
+            user_id : selectedUser.id,
+            action : action
+          }
         })
-    }
+       }
       
-    if(!updateUser){
+    if (!updateUser && !createUser) {
         return (
             <>
-            {userPerms.includes("admin_demande_liste_utilisateurs") ? (
-                    <UserListDisplay 
+                {userPerms.includes("admin_demande_liste_utilisateurs") ? (
+                    <UserListDisplay
                         regex={regex}
                         setRegex={setRegex}
                         rows={rows}
                         columns={columns}
+                        setCreateUser={setCreateUser}
                         openChangeStatus={openChangeStatus}
                         setOpenChangeStatus={setOpenChangeStatus}
                         selectedUser={selectedUser}
@@ -227,9 +245,8 @@ export default function HomeUserGestion ({userPerms} : {userPerms : string[]}) {
                         action={action}
                     />
                 ) : (
-                    <></> //FAIRE CE QU'ON AFFICHE SI PAS LE DROIT 
-                )
-            }
+                    <></> //FAIRE CE QU'ON AFFICHE SI PAS LE DROIT
+                )}
                 <CustomSnackBar
                     open={openAlert}
                     setOpen={setOpenAlert}
@@ -238,13 +255,14 @@ export default function HomeUserGestion ({userPerms} : {userPerms : string[]}) {
                 />
             </>
         )
-    }
-    else{
+    } else if (updateUser) {
         return (
             <UpdateUserRole
                 user={selectedUser}
                 setUpdateUser={setUpdateUser}
             />
         )
+    } else {
+        return <CreateUser setCreateUser={setCreateUser} />
     }
 }

@@ -15,6 +15,7 @@ import HomePermGestion from "./perm_gestion/HomePermGestion"
 import HomeTeamGestion from "./team_gestion/HomeTeamGestion"
 
 export default function HomeAdmin({user} : {user : any}) {
+    
     const [selectedTab, setSelectedTab] = useState<string>("");
     const [userPerms, setUserPerms] = useState<string[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<number>(0);
@@ -56,10 +57,13 @@ export default function HomeAdmin({user} : {user : any}) {
                     setUserPerms(perms);
                 }
                 if (msg.update_user_roles_response || msg.updated_role) {
+                    if (!user?.id) return;
+                   
                     controleur.envoie(handler, {
-                        "user_perms_request" : {userId : user?.id}
+                     "user_perms_request": { userId: user.id }
                     })
                 }
+
                 if(msg.users_list_response){
                     const nbOnlineUsers = msg.users_list_response.users.reduce((acc : number, user : any) => {
                         return acc + (user.online ? 1 : 0);
@@ -81,11 +85,14 @@ export default function HomeAdmin({user} : {user : any}) {
     }, [router, controleur, canal])
 
     useEffect(() => {
+        if (!user?.id || !controleur) return;
+       
         controleur.envoie(handler, {
-            "user_perms_request" : {userId : user?.id}
+         "user_perms_request": { userId: user.id }
         })
-    }, [user])
-
+       
+       }, [user, controleur])
+    
     useEffect(() => {
         setIsAdmin(userPerms.some((perm: string) => perm.includes("admin")));
     }, [userPerms]);

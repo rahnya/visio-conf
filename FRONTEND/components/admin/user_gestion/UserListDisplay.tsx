@@ -12,6 +12,7 @@ export default function UserListDisplay ({
     setRegex,
     rows, 
     columns,
+    setCreateUser,
     openChangeStatus,
     setOpenChangeStatus,
     selectedUser,
@@ -24,6 +25,7 @@ export default function UserListDisplay ({
     setRegex : Function,
     rows : any, 
     columns : any,
+    setCreateUser : Function,
     openChangeStatus : boolean,
     setOpenChangeStatus : Function,
     selectedUser : any,
@@ -34,12 +36,23 @@ export default function UserListDisplay ({
 }) {
     return (
         <div className={styles.container}>
-            <div style={{display: "flex", justifyContent: "left"}}>
+            <div style={{display: "flex", justifyContent: "space-between"}}>
                 <div style={{display : "flex", alignItems : "center", columnGap: "20px"}}>
                     <img src="./icons/User_Friend.svg" alt="" className={styles.icon}/>
-                    <Typography variant="subtitle1" className={styles.title} style={{fontSize: "32px", fontWeight: 700}}>Liste des utilisateurs</Typography>
+                    <Typography variant="subtitle1" className={styles.title} style={{fontSize: "32px", fontWeight: 700}}>
+                    Liste des utilisateurs
+                    </Typography>
                 </div>
+
+                <button
+                    onClick={() => setCreateUser(true)}
+                    style={{backgroundColor:"#223A6A"}}
+                    className={styles.addButton}
+                    >
+                    + Ajouter
+                </button>
             </div>
+
             <TextField 
                 id="regex"
                 type="text"
@@ -101,7 +114,7 @@ export default function UserListDisplay ({
             <CustomSnackBar
                 open={openAlert}
                 setOpen={setOpenAlert}
-                msg="Rôle supprimé avec succès !"
+                msg="Utiisateur supprimé avec succès !"
                 severity="success"
             />
         </div>

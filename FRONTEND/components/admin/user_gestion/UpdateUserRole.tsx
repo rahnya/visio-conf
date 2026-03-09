@@ -54,9 +54,10 @@ export default function UpdateUserRole ({
                 if (verbose || controleur?.verboseall)
                     console.log(`INFO: (${nomDInstance}) - traitementMessage - `,msg)
                 if (msg.roles_list_response) {
-                    setRoleList(msg.roles_list_response)
+                    setRoleList(msg.roles_list_response.roles)
                 }
                 if (msg.update_user_roles_response) {
+                    console.log("UPDATE USER ROLE RESPONSE :", msg.update_user_roles_response);
                     setUpdateUser(false);
                 }
             },
@@ -71,13 +72,15 @@ export default function UpdateUserRole ({
                 controleur.desincription(handler,listeMessageEmis,listeMessageRecus)
             }
         }
-    }, [router, controleur, canal])
+    }, [controleur, canal])
 
     useEffect(() => {
-        controleur.envoie(handler, {
-            "roles_list_request" : 1
-        })
-    }, [])
+        if(controleur){
+         controleur.envoie(handler, {
+          "roles_list_request": 1
+         })
+        }
+    }, [controleur])
 
     useEffect(() => {
         if(user){
@@ -94,6 +97,13 @@ export default function UpdateUserRole ({
     }, [user])
 
     const handleUpdateUser = () => {
+        console.log("UPDATE USER REQUEST", {
+            user_id : user.id,
+            roles : selectedRoles
+          })
+          
+          console.log("ROLES ENVOYÉS :", selectedRoles)
+
         controleur.envoie(handler, {
             "update_user_roles_request" : {
                 user_id : user.id,
@@ -111,12 +121,12 @@ export default function UpdateUserRole ({
 
     const handleCheckboxChange = (role : Role) => {
         setSelectedRoles((prevRoles) => {
-            const isSelected = prevRoles?.some(roleId => roleId === role._id);
-
+            const isSelected = prevRoles.includes(role._id);
+          
             if (isSelected) {
-                return prevRoles?.filter(roleId => roleId !== role._id);
+             return prevRoles.filter(r => r !== role._id);
             } else {
-                return [...prevRoles, role._id];
+             return [...prevRoles, role._id];
             }
         });
     };

@@ -82,7 +82,7 @@ class UsersService {
         }
         if (mesg.update_user_roles_request) {
             const user = await User.findOneAndUpdate(
-                { _id: mesg.update_user_roles_request.user_id },
+                { uuid: mesg.update_user_roles_request.user_id },
                 {
                     firstname: mesg.update_user_roles_request.firstname,
                     lastname: mesg.update_user_roles_request.lastname,
@@ -90,9 +90,6 @@ class UsersService {
                     phone: mesg.update_user_roles_request.phone,
                     job: mesg.update_user_roles_request.job,
                     desc: mesg.update_user_roles_request.desc,
-                    password: await this.sha256(
-                        mesg.update_user_roles_request.lastname
-                    ),
                     roles: mesg.update_user_roles_request.roles,
                 },
                 { new: true }
@@ -164,6 +161,7 @@ class UsersService {
         }
         if (mesg.update_user_status_request) {
             const action = mesg.update_user_status_request.action;
+
             const newStatus =
                 action === "activate"
                     ? "active"
@@ -171,8 +169,7 @@ class UsersService {
                     ? "deleted"
                     : "banned";
             const user = await User.findOneAndUpdate(
-                { _id: mesg.update_user_status_request.user_id },
-                { status: newStatus },
+                { uuid: mesg.update_user_status_request.user_id },                { status: newStatus },
                 { new: true }
             );
             if (!user) throw new Error("User not found");
@@ -194,31 +191,42 @@ class UsersService {
 
     async handleLogin(mesg) {
         try {
-            const { email, password } = mesg.login_request;
-            const hashedPassword = await this.sha256(password);
-            const user = await User.findOne({
-                email,
-                password: hashedPassword,
-            });
-            if (user) {
-                const token = this.createToken(user); // Use simplified token creation
-                const message = {
-                    login_response: { etat: true, token },
-                    id: [mesg.id],
-                };
-                this.controleur.envoie(this, message);
-            } else {
-                throw new Error("Invalid credentials");
-            }
+         const { email, password } = mesg.login_request;
+         const hashedPassword = await this.sha256(password);
+       
+         const user = await User.findOne({ email });
+       
+         if (!user) {
+          throw new Error("Invalid credentials");
+         }
+       
+         // bloque les comptes désactivés
+         if (user.status !== "active") {
+          throw new Error("Account disabled");
+         }
+       
+         if (user.password !== hashedPassword) {
+          throw new Error("Invalid credentials");
+         }
+       
+         const token = this.createToken(user);
+       
+         const message = {
+          login_response: { etat: true, token },
+          id: [mesg.id],
+         };
+       
+         this.controleur.envoie(this, message);
+       
         } catch (error) {
-            const message = {
-                login_response: { etat: false, error: error.message },
-                id: [mesg.id],
-            };
-            this.controleur.envoie(this, message);
+         const message = {
+          login_response: { etat: false, error: error.message },
+          id: [mesg.id],
+         };
+       
+         this.controleur.envoie(this, message);
         }
-    }
-
+    };
     async handleSignup(mesg) {
         try {
             const { email, password, firstname, lastname, phone, job, desc } =
@@ -274,7 +282,10 @@ class UsersService {
                 picture: user.picture,
                 status: user.status,
                 roles: user.roles
-                    ? user.roles.map((role) => role.role_label)
+                    ? user.roles.map((role) => ({
+                        _id: role._id,
+                        role_label: role.role_label
+                    }))
                     : [],
                 online: user.is_online,
                 phone: user.phone,

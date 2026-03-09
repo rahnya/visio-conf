@@ -126,15 +126,15 @@ export default function PostItem({
             <p className={styles.postText}>{post.content}</p>
 
             <div className={styles.postFooter}>
-                {!isAdmin && (
-                    <button
-                        className={styles.replyButton}
-                        onClick={handleReplyClick}
-                    >
-                        <MessageCircle size={16} />
-                        <span>Répondre</span>
-                    </button>
-                )}
+            
+                <button
+                    className={styles.replyButton}
+                    onClick={handleReplyClick}
+                >
+                    <MessageCircle size={16} />
+                    <span>Répondre</span>
+                </button>
+                
 
                 {responseCount > 0 && (
                     <button
