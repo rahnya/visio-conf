@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visio-Conf — Cartographie des Messages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #181c27;
+  --surface2: #1e2333;
+  --border: #2a3045;
+  --border2: #374060;
+  --text: #e8ecf4;
+  --text2: #8a94b0;
+  --text3: #5a6480;
+  --accent: #4f8ef7;
+  --accent2: #3a6fd4;
+  --green: #3ecf8e;
+  --orange: #f59e42;
+  --red: #f25f5c;
+  --purple: #a78bfa;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Layout ── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 56px;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 8px;
+}
+.logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+nav { display: flex; gap: 4px; }
+nav button {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  color: var(--text2); padding: 6px 14px; border-radius: 6px;
+  transition: all 0.15s;
+}
+nav button:hover { color: var(--text); background: var(--surface2); }
+nav button.active { color: var(--accent); background: rgba(79,142,247,0.12); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.main { flex: 1; padding: 28px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+/* ── Page header ── */
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title {
+  font-size: 22px; font-weight: 600; color: var(--text);
+}
+.page-title span { color: var(--text3); font-weight: 400; font-size: 14px; margin-left: 10px; }
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0 12px; flex: 1; max-width: 340px;
+}
+.search-box svg { color: var(--text3); flex-shrink: 0; }
+.search-box input {
+  background: none; border: none; outline: none;
+  font-family: var(--sans); font-size: 13px; color: var(--text);
+  width: 100%; padding: 8px 0;
+}
+.search-box input::placeholder { color: var(--text3); }
+.filter-select {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 8px 12px; border-radius: 8px; cursor: pointer; outline: none;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-sm {
+  font-size: 12px; padding: 5px 10px; border-radius: 6px;
+  font-family: var(--sans); font-weight: 500; border: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-edit { background: rgba(79,142,247,0.12); color: var(--accent); }
+.btn-edit:hover { background: rgba(79,142,247,0.22); }
+.btn-delete { background: rgba(242,95,92,0.1); color: var(--red); }
+.btn-delete:hover { background: rgba(242,95,92,0.2); }
+.btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #d94f4c; }
+
+/* ── Table ── */
+.table-wrap {
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--surface2); }
+th {
+  text-align: left; padding: 11px 16px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--text2); }
+th.sort-asc::after { content: ' ↑'; color: var(--accent); }
+th.sort-desc::after { content: ' ↓'; color: var(--accent); }
+td { padding: 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr.main-row:last-child td { border-bottom: none; }
+tr.main-row:hover > td { background: rgba(255,255,255,0.02); }
+
+.row-toggle {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; cursor: pointer; width: 100%;
+  background: none; border: none; color: inherit; font: inherit; text-align: left;
+  transition: background 0.1s;
+}
+.row-toggle:hover { background: rgba(255,255,255,0.03); }
+.toggle-icon {
+  width: 18px; height: 18px; border-radius: 4px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 9px; color: var(--text3);
+  transition: all 0.15s;
+}
+.expanded .toggle-icon { background: rgba(79,142,247,0.15); border-color: var(--accent); color: var(--accent); }
+.msg-name { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+
+/* Badges */
+.badge {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+  display: inline-block;
+}
+.badge-client { background: rgba(245,158,66,0.15); color: var(--orange); border: 1px solid rgba(245,158,66,0.2); }
+.badge-server { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.18); }
+.badge-none { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.badge-wrap { display: flex; flex-wrap: wrap; gap: 4px; padding: 12px 16px; }
+.actions-cell { padding: 10px 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+
+/* Detail row */
+tr.detail-row { display: none; }
+tr.detail-row.open { display: table-row; }
+.detail-inner {
+  padding: 16px 20px 20px 52px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+}
+.detail-section label {
+  display: block; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text3); margin-bottom: 8px;
+}
+.code-block {
+  background: #0a0d14; border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px;
+  font-family: var(--mono); font-size: 12px; color: #a8c4f0;
+  white-space: pre; overflow-x: auto; line-height: 1.6;
+}
+.code-block.example { color: var(--green); }
+
+/* ── Composants page ── */
+.comp-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.comp-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px; transition: border-color 0.15s;
+}
+.comp-card:hover { border-color: var(--border2); }
+.comp-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.comp-name { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); }
+.type-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 4px;
+}
+.type-client { background: rgba(245,158,66,0.15); color: var(--orange); }
+.type-server { background: rgba(62,207,142,0.12); color: var(--green); }
+.type-infra { background: rgba(167,139,250,0.12); color: var(--purple); }
+.comp-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 14px; }
+.comp-stats { display: flex; gap: 16px; }
+.stat { font-size: 12px; color: var(--text3); }
+.stat strong { color: var(--text2); font-family: var(--mono); font-size: 13px; }
+.comp-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 28px; width: 600px; max-width: 95vw;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+.modal-title {
+  font-size: 17px; font-weight: 600; color: var(--text);
+  margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+}
+.form-grid { display: grid; gap: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+.form-group input, .form-group select, .form-group textarea {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 9px 12px; border-radius: 7px; outline: none;
+  transition: border-color 0.15s;
+}
+.form-group textarea { font-family: var(--mono); font-size: 12px; resize: vertical; min-height: 80px; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 2px rgba(79,142,247,0.12);
+}
+.form-group select option { background: var(--surface2); }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border);
+}
+
+/* Delete modal */
+.delete-modal { max-width: 420px; }
+.delete-msg { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 6px; }
+.delete-name { font-family: var(--mono); color: var(--red); font-weight: 600; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 2000;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 12px 18px;
+  font-size: 13px; color: var(--text); opacity: 0;
+  transform: translateY(8px); transition: all 0.25s;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+
+/* ── Empty state ── */
+.empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text3); font-size: 14px;
+}
+.empty svg { margin-bottom: 12px; opacity: 0.4; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo"><div class="logo-dot"></div>visio-conf</div>
+    <nav>
+      <button class="active" onclick="showPage('messages')" id="nav-messages">Messages</button>
+      <button onclick="showPage('composants')" id="nav-composants">Composants</button>
+    </nav>
+    <div class="header-right">
+      <button class="btn btn-primary" onclick="openAddModal()" id="btn-add-msg" style="display:inline-flex">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter un message
+      </button>
+      <button class="btn btn-primary" onclick="openAddCompModal()" id="btn-add-comp" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter un composant
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- PAGE MESSAGES -->
+    <div id="page-messages">
+      <div class="page-header">
+        <div class="page-title">Cartographie des Messages <span id="msg-count"></span></div>
+      </div>
+      <div class="toolbar">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" placeholder="Rechercher un message..." oninput="renderMessages()">
+        </div>
+        <select class="filter-select" id="filter-emis" onchange="renderMessages()">
+          <option value="">Tous les émetteurs</option>
+        </select>
+        <select class="filter-select" id="filter-recus" onchange="renderMessages()">
+          <option value="">Tous les récepteurs</option>
+        </select>
+        <select class="filter-select" id="sort-select" onchange="renderMessages()">
+          <option value="nom_asc">Nom A→Z</option>
+          <option value="nom_desc">Nom Z→A</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40%">Nom du message</th>
+              <th style="width:22%">Émis par</th>
+              <th style="width:22%">Reçu par</th>
+              <th style="width:16%">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="messages-tbody"></tbody>
+        </table>
+      </div>
+      <div id="msg-empty" class="empty" style="display:none">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15" x2="12" y2="15"/></svg>
+        <div>Aucun message trouvé</div>
+      </div>
+    </div>
+
+    <!-- PAGE COMPOSANTS -->
+    <div id="page-composants" style="display:none">
+      <div class="page-header">
+        <div class="page-title">Composants <span id="comp-count"></span></div>
+      </div>
+      <div class="toolbar">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="comp-search" placeholder="Rechercher un composant..." oninput="renderComposants()">
+        </div>
+        <select class="filter-select" id="filter-type" onchange="renderComposants()">
+          <option value="">Tous les types</option>
+          <option value="c">Client</option>
+          <option value="s">Serveur</option>
+          <option value="i">Infrastructure</option>
+        </select>
+      </div>
+      <div class="comp-grid" id="comp-grid"></div>
+      <div id="comp-empty" class="empty" style="display:none">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <div>Aucun composant trouvé</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Message -->
+<div class="modal-overlay" id="msg-modal">
+  <div class="modal">
+    <div class="modal-title" id="msg-modal-title">Ajouter un message</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nom du message *</label>
+        <input type="text" id="f-nom" placeholder="ex: login_request" spellcheck="false">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Émis par</label>
+          <select id="f-emis"><option value="-">—</option></select>
+        </div>
+        <div class="form-group">
+          <label>Reçu par</label>
+          <select id="f-recus"><option value="-">—</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Structure JSON</label>
+        <textarea id="f-structure" rows="6" placeholder='{"key": "type", ...}'></textarea>
+      </div>
+      <div class="form-group">
+        <label>Exemple</label>
+        <textarea id="f-exemple" rows="5" placeholder="Exemple de valeur..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('msg-modal')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveMessage()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Composant -->
+<div class="modal-overlay" id="comp-modal">
+  <div class="modal">
+    <div class="modal-title" id="comp-modal-title">Ajouter un composant</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" id="fc-nom" placeholder="ex: UsersService">
+        </div>
+        <div class="form-group">
+          <label>Type *</label>
+          <select id="fc-type">
+            <option value="s">Serveur</option>
+            <option value="c">Client</option>
+            <option value="i">Infrastructure</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="fc-desc" rows="4" placeholder="Description du composant..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('comp-modal')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveComposant()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete confirm -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal delete-modal">
+    <div class="modal-title">Confirmer la suppression</div>
+    <div class="delete-msg">Supprimer le message <span class="delete-name" id="del-name"></span> ?<br>Cette action est irréversible.</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('del-modal')">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete composant confirm -->
+<div class="modal-overlay" id="del-comp-modal">
+  <div class="modal delete-modal">
+    <div class="modal-title">Supprimer le composant</div>
+    <div class="delete-msg">Supprimer le composant <span class="delete-name" id="del-comp-name"></span> ?</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('del-comp-modal')">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmDeleteComp()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════════
+
+const DEFAULT_COMPOSANTS = [
+  // Infrastructure
+  { id: 'c1', nom: 'Controleur', type: 'i', desc: 'Bus de messages côté serveur. Maintient les registres émetteurs et abonnés. Route automatiquement les messages entre composants via inscription() et envoie().' },
+  { id: 'c2', nom: 'Controleur', type: 'c', desc: 'Même pattern publish-subscribe côté client (Next.js). Les composants React s\'enregistrent pour émettre des requêtes ou recevoir des réponses.' },
+  { id: 'c3', nom: 'CanalSocketio', type: 'i', desc: 'Passerelle WebSocket côté serveur. Reçoit les messages socket et les injecte dans le Controleur(s). Gère la déconnexion et le passage en statut offline.' },
+  { id: 'c4', nom: 'CanalSocketio', type: 'c', desc: 'Passerelle WebSocket côté client. Transmet les messages du Controleur(c) vers le serveur. Récupère dynamiquement les listes via demande_liste/donne_liste.' },
+  { id: 'c5', nom: 'SocketIdentificationService', type: 'i', desc: 'Service singleton gérant les associations socket↔utilisateur en mémoire (Maps). Permet à tous les services de retrouver le socket.id d\'un utilisateur.' },
+  // Serveur
+  { id: 'c6', nom: 'UsersService', type: 's', desc: 'Auth, inscription, liste et mise à jour des utilisateurs. JWT tokens. Hash SHA-256. Bloque les comptes non actifs.' },
+  { id: 'c7', nom: 'MessagesService', type: 's', desc: 'Discussions privées et de groupe. Crée les discussions à la première prise de contact, empêche les doublons. Notifie tous les membres connectés.' },
+  { id: 'c8', nom: 'TeamsService', type: 's', desc: 'Gestion des équipes. Crée un canal "Général" automatiquement à la création. Cascade sur canaux/membres à la suppression. Vérification des droits admin.' },
+  { id: 'c9', nom: 'ChannelsService', type: 's', desc: 'Canaux au sein d\'une équipe (public/privé). Posts et réponses en temps réel. Diffusion à tous les membres connectés du canal.' },
+  { id: 'c10', nom: 'DriveService', type: 's', desc: 'Stockage de fichiers. Arborescence de dossiers, partage à des équipes, renommage, déplacement (anti-circulaire), suppression logique.' },
+  { id: 'c11', nom: 'RolesService', type: 's', desc: 'Rôles utilisateurs. Notifie tous les porteurs d\'un rôle à sa mise à jour. La suppression est relayée à UsersService.' },
+  { id: 'c12', nom: 'PermsService', type: 's', desc: 'Permissions du système. Chaque permission a un UUID et un libellé. Vérification de l\'unicité de l\'UUID à la création.' },
+];
+
+const DEFAULT_MESSAGES = [
+  // Auth
+  { id: 'm1', nom: 'login_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "login_request": {\n    "email": "string",\n    "password": "string"\n  }\n}',
+    exemple: '{\n  "login_request": {\n    "email": "alice@example.com",\n    "password": "sha256hash..."\n  }\n}' },
+  { id: 'm2', nom: 'login_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "login_response": {\n    "etat": "boolean",\n    "token": "string (JWT 7j)",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "login_response": {\n    "etat": true,\n    "token": "eyJhbGci..."\n  }\n}' },
+  { id: 'm3', nom: 'signup_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "signup_request": {\n    "email": "string",\n    "password": "string",\n    "firstname": "string",\n    "lastname": "string",\n    "phone": "string",\n    "job": "string",\n    "desc": "string"\n  }\n}',
+    exemple: '{\n  "signup_request": {\n    "email": "bob@example.com",\n    "password": "sha256hash...",\n    "firstname": "Bob",\n    "lastname": "Martin"\n  }\n}' },
+  { id: 'm4', nom: 'signup_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "signup_response": {\n    "etat": "boolean",\n    "token": "string (JWT)",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "signup_response": {\n    "etat": false,\n    "error": "User already exists"\n  }\n}' },
+  { id: 'm5', nom: 'client_deconnexion', emis: 'CanalSocketio', recus: 'Controleur',
+    structure: '{\n  "client_deconnexion": "string (socket_id)"\n}',
+    exemple: '{\n  "client_deconnexion": "xyz-socket-id-789"\n}' },
+  // Users
+  { id: 'm6', nom: 'users_list_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "users_list_request": {}\n  // Aucune donnée requise\n}',
+    exemple: '{\n  "users_list_request": {}\n}' },
+  { id: 'm7', nom: 'users_list_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "users_list_response": {\n    "etat": "boolean",\n    "users": "User[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "users_list_response": {\n    "etat": true,\n    "users": [\n      { "id": "uuid...", "firstname": "Alice", "email": "alice@...", "status": "active" }\n    ]\n  }\n}' },
+  { id: 'm8', nom: 'user_info_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "user_info_request": {\n    "userId": "string (ObjectId ou UUID)"\n  }\n}',
+    exemple: '{\n  "user_info_request": {\n    "userId": "6601a2f3e4b0c12d34567890"\n  }\n}' },
+  { id: 'm9', nom: 'user_info_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "user_info_response": {\n    "etat": "boolean",\n    "userInfo": "User",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "user_info_response": {\n    "etat": true,\n    "userInfo": {\n      "id": "uuid...", "firstname": "Alice",\n      "roles": ["admin"]\n    }\n  }\n}' },
+  { id: 'm10', nom: 'update_user_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "update_user_request": {\n    "firstname": "string (optionnel)",\n    "lastname": "string (optionnel)",\n    "picture": "string (optionnel)",\n    "phone": "string (optionnel)",\n    "job": "string (optionnel)",\n    "desc": "string (optionnel)",\n    "disturb_status": "string (optionnel)"\n  }\n}',
+    exemple: '{\n  "update_user_request": {\n    "disturb_status": "busy",\n    "job": "Développeur"\n  }\n}' },
+  { id: 'm11', nom: 'update_user_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "update_user_response": {\n    "etat": "boolean",\n    "newUserInfo": "User | null",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "update_user_response": {\n    "etat": true,\n    "newUserInfo": { "id": "...", "firstname": "Alice Updated" }\n  }\n}' },
+  { id: 'm12', nom: 'update_user_status_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "update_user_status_request": {\n    "user_id": "string (UUID)",\n    "action": "activate | deactivate | ban"\n  }\n}',
+    exemple: '{\n  "update_user_status_request": {\n    "user_id": "uuid...",\n    "action": "ban"\n  }\n}' },
+  { id: 'm13', nom: 'update_user_status_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "update_user_status_response": {\n    "etat": "boolean",\n    "action": "string"\n  }\n}',
+    exemple: '{\n  "update_user_status_response": {\n    "etat": true,\n    "action": "ban"\n  }\n}' },
+  { id: 'm14', nom: 'update_user_roles_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "update_user_roles_request": {\n    "user_id": "string (UUID)",\n    "roles": "ObjectId[]",\n    "firstname": "string",\n    "lastname": "string",\n    "email": "string"\n  }\n}',
+    exemple: '{\n  "update_user_roles_request": {\n    "user_id": "uuid...",\n    "roles": ["665a1b2c..."]\n  }\n}' },
+  { id: 'm15', nom: 'update_user_roles_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "update_user_roles_response": {\n    "userId": "string (UUID)"\n  }\n}',
+    exemple: '{\n  "update_user_roles_response": {\n    "userId": "uuid..."\n  }\n}' },
+  { id: 'm16', nom: 'user_perms_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "user_perms_request": {\n    "userId": "string (UUID)"\n  }\n}',
+    exemple: '{\n  "user_perms_request": {\n    "userId": "uuid..."\n  }\n}' },
+  { id: 'm17', nom: 'user_perms_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "user_perms_response": {\n    "perms": "string[] (permission_uuid)"\n  }\n}',
+    exemple: '{\n  "user_perms_response": {\n    "perms": ["manage_users", "view_channels"]\n  }\n}' },
+  // Messages/Discuss
+  { id: 'm18', nom: 'messages_get_request', emis: 'CanalSocketio', recus: 'MessagesService',
+    structure: '{\n  "messages_get_request": {\n    "convId": "string (UUID discussion)"\n  }\n}',
+    exemple: '{\n  "messages_get_request": {\n    "convId": "550e8400-e29b-41d4-a716..."\n  }\n}' },
+  { id: 'm19', nom: 'messages_get_response', emis: 'MessagesService', recus: 'CanalSocketio',
+    structure: '{\n  "messages_get_response": {\n    "etat": "boolean",\n    "messages": "Message[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "messages_get_response": {\n    "etat": true,\n    "messages": [\n      {\n        "message_uuid": "uuid...",\n        "message_content": "Bonjour !",\n        "message_sender": { "firstname": "Alice" }\n      }\n    ]\n  }\n}' },
+  { id: 'm20', nom: 'message_send_request', emis: 'CanalSocketio', recus: 'MessagesService',
+    structure: '{\n  "message_send_request": {\n    "userEmail": "string",\n    "otherUserEmail": "string[] — nouvelle discussion",\n    "discussion_uuid": "string (UUID)",\n    "message_uuid": "string (UUID)",\n    "message_content": "string",\n    "message_date_create": "Date"\n  }\n}',
+    exemple: '{\n  "message_send_request": {\n    "userEmail": "alice@example.com",\n    "discussion_uuid": "uuid...",\n    "message_uuid": "uuid...",\n    "message_content": "Salut !"\n  }\n}' },
+  { id: 'm21', nom: 'message_send_response', emis: 'MessagesService', recus: 'CanalSocketio',
+    structure: '{\n  "message_send_response": {\n    "etat": "boolean",\n    "discussion_uuid": "string — si nouvelle discussion",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '// Envoyé à TOUS les membres connectés\n{\n  "message_send_response": {\n    "etat": true\n  }\n}' },
+  { id: 'm22', nom: 'discuss_list_request', emis: 'CanalSocketio', recus: 'MessagesService',
+    structure: '{\n  "discuss_list_request": "string (userId — ObjectId ou UUID)"\n}',
+    exemple: '{\n  "discuss_list_request": "6601a2f3e4b0c12d34567890"\n}' },
+  { id: 'm23', nom: 'discuss_list_response', emis: 'MessagesService', recus: 'CanalSocketio',
+    structure: '{\n  "discuss_list_response": {\n    "etat": "boolean",\n    "messages": "Discussion[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "discuss_list_response": {\n    "etat": true,\n    "messages": [\n      {\n        "discussion_uuid": "uuid...",\n        "discussion_type": "unique",\n        "last_message": { "message_content": "Salut !" }\n      }\n    ]\n  }\n}' },
+  { id: 'm24', nom: 'users_search_request', emis: 'CanalSocketio', recus: 'MessagesService',
+    structure: '{\n  "users_search_request": "string (terme de recherche)"\n}',
+    exemple: '{\n  "users_search_request": "Alice"\n}' },
+  { id: 'm25', nom: 'users_search_response', emis: 'MessagesService', recus: 'CanalSocketio',
+    structure: '{\n  "users_search_response": {\n    "etat": "boolean",\n    "users": "User[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "users_search_response": {\n    "etat": true,\n    "users": [{ "id": "...", "firstname": "Alice", "lastname": "Dupont" }]\n  }\n}' },
+  { id: 'm26', nom: 'discuss_remove_member_request', emis: 'CanalSocketio', recus: 'MessagesService',
+    structure: '{\n  "discuss_remove_member_request": ["userId", "convId"]\n}',
+    exemple: '{\n  "discuss_remove_member_request": ["6601a2f3...", "550e8400-uuid..."]\n}' },
+  { id: 'm27', nom: 'discuss_remove_member_response', emis: 'MessagesService', recus: 'CanalSocketio',
+    structure: '{\n  "discuss_remove_member_response": {\n    "etat": "boolean",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "discuss_remove_member_response": { "etat": true } }' },
+  { id: 'm28', nom: 'discuss_remove_message_request', emis: 'CanalSocketio', recus: 'MessagesService',
+    structure: '{\n  "discuss_remove_message_request": ["messageId", "convId"]\n}',
+    exemple: '{\n  "discuss_remove_message_request": ["msg-uuid...", "conv-uuid..."]\n}' },
+  { id: 'm29', nom: 'discuss_remove_message_response', emis: 'MessagesService', recus: 'CanalSocketio',
+    structure: '{\n  "discuss_remove_message_response": {\n    "etat": "boolean",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "discuss_remove_message_response": { "etat": true } }' },
+  { id: 'm30', nom: 'message_status_request', emis: 'CanalSocketio', recus: 'MessagesService',
+    structure: '{\n  "message_status_request": "string (convId — UUID discussion)"\n}',
+    exemple: '{\n  "message_status_request": "550e8400-e29b-41d4-uuid..."\n}' },
+  { id: 'm31', nom: 'message_status_response', emis: 'MessagesService', recus: 'CanalSocketio',
+    structure: '{\n  "message_status_response": {\n    "etat": "boolean",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '// Envoyé à tous les membres de la discussion\n{\n  "message_status_response": { "etat": true }\n}' },
+  // Roles
+  { id: 'm32', nom: 'roles_list_request', emis: 'CanalSocketio', recus: 'RolesService',
+    structure: '{\n  "roles_list_request": {}\n  // Aucune donnée requise\n}',
+    exemple: '{ "roles_list_request": {} }' },
+  { id: 'm33', nom: 'roles_list_response', emis: 'RolesService', recus: 'CanalSocketio',
+    structure: '{\n  "roles_list_response": "Role[]"\n}',
+    exemple: '{\n  "roles_list_response": [\n    { "_id": "...", "role_label": "Admin", "role_permissions": [...] }\n  ]\n}' },
+  { id: 'm34', nom: 'one_role_request', emis: 'CanalSocketio', recus: 'RolesService',
+    structure: '{\n  "one_role_request": {\n    "role_id": "ObjectId"\n  }\n}',
+    exemple: '{\n  "one_role_request": {\n    "role_id": "665a1b2c3d4e5f6a7b8c9d0e"\n  }\n}' },
+  { id: 'm35', nom: 'one_role_response', emis: 'RolesService', recus: 'CanalSocketio',
+    structure: '{\n  "one_role_response": {\n    "role": "Role"\n  }\n}',
+    exemple: '{\n  "one_role_response": {\n    "role": { "_id": "...", "role_label": "Modérateur" }\n  }\n}' },
+  { id: 'm36', nom: 'create_role_request', emis: 'CanalSocketio', recus: 'RolesService',
+    structure: '{\n  "create_role_request": {\n    "name": "string",\n    "perms": "ObjectId[]",\n    "action": "string"\n  }\n}',
+    exemple: '{\n  "create_role_request": {\n    "name": "Modérateur",\n    "perms": [],\n    "action": "create"\n  }\n}' },
+  { id: 'm37', nom: 'created_role', emis: 'RolesService', recus: 'CanalSocketio',
+    structure: '{\n  "created_role": {\n    "role_id": "ObjectId",\n    "action": "string"\n  }\n}',
+    exemple: '{\n  "created_role": {\n    "role_id": "665a1b2c...",\n    "action": "create"\n  }\n}' },
+  { id: 'm38', nom: 'role_already_exists', emis: 'RolesService', recus: 'CanalSocketio',
+    structure: '{\n  "role_already_exists": {\n    "role_id": "ObjectId"\n  }\n}',
+    exemple: '{\n  "role_already_exists": {\n    "role_id": "665a1b2c..."\n  }\n}' },
+  { id: 'm39', nom: 'update_role_request', emis: 'CanalSocketio', recus: 'RolesService',
+    structure: '{\n  "update_role_request": {\n    "role_id": "ObjectId",\n    "perms": "ObjectId[]"\n  }\n}',
+    exemple: '{\n  "update_role_request": {\n    "role_id": "665a1b2c...",\n    "perms": ["664f1a2b..."]\n  }\n}' },
+  { id: 'm40', nom: 'updated_role', emis: 'RolesService', recus: 'CanalSocketio',
+    structure: '{\n  "updated_role": {\n    "state": "boolean"\n  }\n}',
+    exemple: '// Envoyé à l\'admin ET tous les porteurs du rôle\n{ "updated_role": { "state": true } }' },
+  { id: 'm41', nom: 'delete_role_request', emis: 'CanalSocketio', recus: 'RolesService',
+    structure: '{\n  "delete_role_request": {\n    "role_id": "ObjectId"\n  }\n}',
+    exemple: '{\n  "delete_role_request": {\n    "role_id": "665a1b2c..."\n  }\n}' },
+  { id: 'm42', nom: 'deleted_role', emis: 'RolesService', recus: 'CanalSocketio',
+    structure: '{\n  "deleted_role": {\n    "state": "boolean"\n  }\n}',
+    exemple: '{ "deleted_role": { "state": true } }' },
+  // Perms
+  { id: 'm43', nom: 'perms_list_request', emis: 'CanalSocketio', recus: 'PermsService',
+    structure: '{\n  "perms_list_request": {}\n  // Aucune donnée requise\n}',
+    exemple: '{ "perms_list_request": {} }' },
+  { id: 'm44', nom: 'perms_list_response', emis: 'PermsService', recus: 'CanalSocketio',
+    structure: '{\n  "perms_list_response": "Permission[]"\n}',
+    exemple: '{\n  "perms_list_response": [\n    { "_id": "...", "permission_uuid": "manage_users", "permission_label": "Gérer les utilisateurs" }\n  ]\n}' },
+  { id: 'm45', nom: 'add_perm_request', emis: 'CanalSocketio', recus: 'PermsService',
+    structure: '{\n  "add_perm_request": {\n    "newLabel": "string",\n    "newUuid": "string"\n  }\n}',
+    exemple: '{\n  "add_perm_request": {\n    "newLabel": "Gérer les fichiers",\n    "newUuid": "manage_files"\n  }\n}' },
+  { id: 'm46', nom: 'add_perm_response', emis: 'PermsService', recus: 'CanalSocketio',
+    structure: '{\n  "add_perm_response": {\n    "message": "done | already exists"\n  }\n}',
+    exemple: '{ "add_perm_response": { "message": "done" } }' },
+  { id: 'm47', nom: 'update_perm_request', emis: 'CanalSocketio', recus: 'PermsService',
+    structure: '{\n  "update_perm_request": {\n    "perm_id": "ObjectId",\n    "newLabel": "string"\n  }\n}',
+    exemple: '{\n  "update_perm_request": {\n    "perm_id": "664f1a2b...",\n    "newLabel": "Nouveau libellé"\n  }\n}' },
+  { id: 'm48', nom: 'update_perm_response', emis: 'PermsService', recus: 'CanalSocketio',
+    structure: '{\n  "update_perm_response": {\n    "state": "boolean"\n  }\n}',
+    exemple: '{ "update_perm_response": { "state": true } }' },
+  { id: 'm49', nom: 'user_perms_request', emis: 'CanalSocketio', recus: 'UsersService',
+    structure: '{\n  "user_perms_request": {\n    "userId": "string (UUID)"\n  }\n}',
+    exemple: '{\n  "user_perms_request": { "userId": "uuid..." }\n}' },
+  { id: 'm50', nom: 'user_perms_response', emis: 'UsersService', recus: 'CanalSocketio',
+    structure: '{\n  "user_perms_response": {\n    "perms": "string[] (permission_uuid)"\n  }\n}',
+    exemple: '{\n  "user_perms_response": {\n    "perms": ["manage_users", "view_channels"]\n  }\n}' },
+  // Files/Drive
+  { id: 'm51', nom: 'files_list_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "files_list_request": {\n    "folderId": "string (UUID) — optionnel"\n  }\n}',
+    exemple: '{\n  "files_list_request": {\n    "folderId": "folder-uuid..."\n  }\n}' },
+  { id: 'm52', nom: 'files_list_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "files_list_response": {\n    "etat": "boolean",\n    "files": "File[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "files_list_response": {\n    "etat": true,\n    "files": [\n      { "id": "...", "name": "rapport.pdf", "type": "file", "size": 204800 }\n    ]\n  }\n}' },
+  { id: 'm53', nom: 'folders_list_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "folders_list_request": {\n    "excludeFolderId": "string — optionnel"\n  }\n}',
+    exemple: '{ "folders_list_request": {} }' },
+  { id: 'm54', nom: 'folders_list_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "folders_list_response": {\n    "etat": "boolean",\n    "folders": "File[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "folders_list_response": {\n    "etat": true,\n    "folders": [{ "id": "...", "name": "Documents", "type": "folder" }]\n  }\n}' },
+  { id: 'm55', nom: 'folder_create_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "folder_create_request": {\n    "name": "string",\n    "parentId": "string (UUID) — optionnel"\n  }\n}',
+    exemple: '{\n  "folder_create_request": {\n    "name": "Projets 2025",\n    "parentId": null\n  }\n}' },
+  { id: 'm56', nom: 'folder_create_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "folder_create_response": {\n    "etat": "boolean",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "folder_create_response": { "etat": true } }' },
+  { id: 'm57', nom: 'file_delete_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "file_delete_request": {\n    "fileId": "string (UUID)"\n  }\n}',
+    exemple: '{ "file_delete_request": { "fileId": "file-uuid..." } }' },
+  { id: 'm58', nom: 'file_delete_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "file_delete_response": {\n    "etat": "boolean",\n    "fileId": "string",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "file_delete_response": {\n    "etat": true,\n    "fileId": "file-uuid..."\n  }\n}' },
+  { id: 'm59', nom: 'file_rename_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "file_rename_request": {\n    "fileId": "string",\n    "newName": "string"\n  }\n}',
+    exemple: '{\n  "file_rename_request": {\n    "fileId": "file-uuid...",\n    "newName": "rapport_final.pdf"\n  }\n}' },
+  { id: 'm60', nom: 'file_rename_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "file_rename_response": {\n    "etat": "boolean",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "file_rename_response": { "etat": true } }' },
+  { id: 'm61', nom: 'file_move_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "file_move_request": {\n    "fileId": "string",\n    "newParentId": "string | null"\n  }\n}',
+    exemple: '{\n  "file_move_request": {\n    "fileId": "file-uuid...",\n    "newParentId": "folder-uuid..."\n  }\n}' },
+  { id: 'm62', nom: 'file_move_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "file_move_response": {\n    "etat": "boolean",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "file_move_response": { "etat": true } }' },
+  { id: 'm63', nom: 'file_share_to_team_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "file_share_to_team_request": {\n    "fileId": "string",\n    "teamId": "string"\n  }\n}',
+    exemple: '{\n  "file_share_to_team_request": {\n    "fileId": "file-uuid...",\n    "teamId": "team-id..."\n  }\n}' },
+  { id: 'm64', nom: 'file_share_to_team_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "file_share_to_team_response": {\n    "etat": "boolean",\n    "fileId": "string",\n    "teamId": "string",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "file_share_to_team_response": {\n    "etat": true,\n    "fileId": "...",\n    "teamId": "..."\n  }\n}' },
+  { id: 'm65', nom: 'shared_files_list_request', emis: 'CanalSocketio', recus: 'DriveService',
+    structure: '{\n  "shared_files_list_request": {\n    "teamId": "string — optionnel"\n  }\n}',
+    exemple: '{\n  "shared_files_list_request": {\n    "teamId": "team-id..."\n  }\n}' },
+  { id: 'm66', nom: 'shared_files_list_response', emis: 'DriveService', recus: 'CanalSocketio',
+    structure: '{\n  "shared_files_list_response": {\n    "etat": "boolean",\n    "files": "File[]",\n    "teamId": "string | null"\n  }\n}',
+    exemple: '{\n  "shared_files_list_response": {\n    "etat": true,\n    "files": [\n      { "id": "...", "name": "contrat.pdf", "owner": { "firstname": "Bob" } }\n    ]\n  }\n}' },
+  // Channels
+  { id: 'm67', nom: 'channels_list_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channels_list_request": {\n    "teamId": "string — optionnel"\n  }\n}',
+    exemple: '{ "channels_list_request": { "teamId": "team-id..." } }' },
+  { id: 'm68', nom: 'channels_list_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channels_list_response": {\n    "etat": "boolean",\n    "channels": "Channel[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "channels_list_response": {\n    "etat": true,\n    "channels": [\n      { "id": "...", "name": "Général", "isPublic": true, "isMember": true }\n    ]\n  }\n}' },
+  { id: 'm69', nom: 'channel_create_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_create_request": {\n    "name": "string",\n    "teamId": "string",\n    "isPublic": "boolean",\n    "members": "string[] — optionnel"\n  }\n}',
+    exemple: '{\n  "channel_create_request": {\n    "name": "dev-backend",\n    "teamId": "team-id...",\n    "isPublic": false,\n    "members": ["user-uuid..."]\n  }\n}' },
+  { id: 'm70', nom: 'channel_create_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_create_response": {\n    "etat": "boolean",\n    "channel": "Channel",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "channel_create_response": {\n    "etat": true,\n    "channel": { "id": "...", "name": "dev-backend" }\n  }\n}' },
+  { id: 'm71', nom: 'channel_update_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_update_request": {\n    "id": "string",\n    "name": "string — optionnel",\n    "isPublic": "boolean — optionnel"\n  }\n}',
+    exemple: '{\n  "channel_update_request": {\n    "id": "channel-id...",\n    "name": "dev-frontend"\n  }\n}' },
+  { id: 'm72', nom: 'channel_update_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_update_response": {\n    "etat": "boolean",\n    "channel": "Channel",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "channel_update_response": { "etat": true, "channel": { "name": "dev-frontend" } } }' },
+  { id: 'm73', nom: 'channel_delete_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_delete_request": {\n    "channelId": "string"\n  }\n}',
+    exemple: '{ "channel_delete_request": { "channelId": "channel-id..." } }' },
+  { id: 'm74', nom: 'channel_delete_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_delete_response": {\n    "etat": "boolean",\n    "channelId": "string",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "channel_delete_response": { "etat": true, "channelId": "..." } }' },
+  { id: 'm75', nom: 'channel_leave_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_leave_request": {\n    "channelId": "string"\n  }\n}',
+    exemple: '{ "channel_leave_request": { "channelId": "channel-id..." } }' },
+  { id: 'm76', nom: 'channel_leave_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_leave_response": {\n    "etat": "boolean",\n    "channelId": "string",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "channel_leave_response": { "etat": true } }' },
+  { id: 'm77', nom: 'channel_members_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_members_request": {\n    "channelId": "string"\n  }\n}',
+    exemple: '{ "channel_members_request": { "channelId": "channel-id..." } }' },
+  { id: 'm78', nom: 'channel_members_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_members_response": {\n    "etat": "boolean",\n    "channelId": "string",\n    "members": "ChannelMember[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "channel_members_response": {\n    "etat": true,\n    "members": [{ "userId": "uuid...", "firstname": "Alice", "role": "admin" }]\n  }\n}' },
+  { id: 'm79', nom: 'channel_add_member_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_add_member_request": {\n    "channelId": "string",\n    "userId": "string"\n  }\n}',
+    exemple: '{\n  "channel_add_member_request": {\n    "channelId": "...",\n    "userId": "user-uuid..."\n  }\n}' },
+  { id: 'm80', nom: 'channel_add_member_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_add_member_response": {\n    "etat": "boolean",\n    "channelId": "string",\n    "member": "ChannelMember",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "channel_add_member_response": { "etat": true, "member": { "role": "member" } } }' },
+  { id: 'm81', nom: 'channel_remove_member_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_remove_member_request": {\n    "channelId": "string",\n    "userId": "string"\n  }\n}',
+    exemple: '{\n  "channel_remove_member_request": {\n    "channelId": "...",\n    "userId": "user-uuid..."\n  }\n}' },
+  { id: 'm82', nom: 'channel_remove_member_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_remove_member_response": {\n    "etat": "boolean",\n    "channelId": "string",\n    "userId": "string",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "channel_remove_member_response": { "etat": true } }' },
+  { id: 'm83', nom: 'channel_posts_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_posts_request": {\n    "channelId": "string"\n  }\n}',
+    exemple: '{ "channel_posts_request": { "channelId": "channel-id..." } }' },
+  { id: 'm84', nom: 'channel_posts_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_posts_response": {\n    "etat": "boolean",\n    "channelId": "string",\n    "posts": "ChannelPost[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "channel_posts_response": {\n    "etat": true,\n    "posts": [\n      { "id": "...", "content": "Bonjour !", "authorName": "Alice", "responseCount": 2 }\n    ]\n  }\n}' },
+  { id: 'm85', nom: 'channel_post_create_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_post_create_request": {\n    "channelId": "string",\n    "content": "string"\n  }\n}',
+    exemple: '{\n  "channel_post_create_request": {\n    "channelId": "...",\n    "content": "Mise à jour de la v2.0 disponible"\n  }\n}' },
+  { id: 'm86', nom: 'channel_post_create_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_post_create_response": {\n    "etat": "boolean",\n    "post": "ChannelPost",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '// Envoyé à TOUS les membres connectés du canal\n{\n  "channel_post_create_response": {\n    "etat": true,\n    "post": { "id": "...", "content": "Mise à jour...", "authorName": "Bob" }\n  }\n}' },
+  { id: 'm87', nom: 'channel_post_response_create_request', emis: 'CanalSocketio', recus: 'ChannelsService',
+    structure: '{\n  "channel_post_response_create_request": {\n    "postId": "string",\n    "content": "string"\n  }\n}',
+    exemple: '{\n  "channel_post_response_create_request": {\n    "postId": "post-id...",\n    "content": "Merci pour l\'info !"\n  }\n}' },
+  { id: 'm88', nom: 'channel_post_response_create_response', emis: 'ChannelsService', recus: 'CanalSocketio',
+    structure: '{\n  "channel_post_response_create_response": {\n    "etat": "boolean",\n    "postId": "string",\n    "response": "ChannelPostResponse",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '// Envoyé à TOUS les membres connectés du canal\n{\n  "channel_post_response_create_response": {\n    "etat": true,\n    "postId": "...",\n    "response": { "content": "Merci !", "authorName": "Alice" }\n  }\n}' },
+  // Teams
+  { id: 'm89', nom: 'teams_list_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "teams_list_request": {}\n  // Aucune donnée requise\n}',
+    exemple: '{ "teams_list_request": {} }' },
+  { id: 'm90', nom: 'teams_list_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "teams_list_response": {\n    "etat": "boolean",\n    "teams": "Team[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "teams_list_response": {\n    "etat": true,\n    "teams": [{ "id": "...", "name": "Équipe Infra", "role": "admin" }]\n  }\n}' },
+  { id: 'm91', nom: 'team_create_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "team_create_request": {\n    "name": "string",\n    "description": "string — optionnel",\n    "picture": "string — optionnel",\n    "members": "string[] — optionnel"\n  }\n}',
+    exemple: '{\n  "team_create_request": {\n    "name": "Équipe Produit",\n    "description": "Équipe product & design",\n    "members": ["user-uuid-1", "user-uuid-2"]\n  }\n}' },
+  { id: 'm92', nom: 'team_create_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "team_create_response": {\n    "etat": "boolean",\n    "team": "Team (avec role: admin)",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "team_create_response": {\n    "etat": true,\n    "team": { "id": "...", "name": "Équipe Produit", "role": "admin" }\n  }\n}' },
+  { id: 'm93', nom: 'team_update_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "team_update_request": {\n    "id": "string",\n    "name": "string — optionnel",\n    "description": "string — optionnel",\n    "picture": "string — optionnel"\n  }\n}',
+    exemple: '{\n  "team_update_request": {\n    "id": "team-id...",\n    "name": "Nouveau nom"\n  }\n}' },
+  { id: 'm94', nom: 'team_update_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "team_update_response": {\n    "etat": "boolean",\n    "team": "Team",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "team_update_response": { "etat": true, "team": { "name": "Nouveau nom" } } }' },
+  { id: 'm95', nom: 'team_delete_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "team_delete_request": {\n    "teamId": "string"\n  }\n}',
+    exemple: '{ "team_delete_request": { "teamId": "team-id..." } }' },
+  { id: 'm96', nom: 'team_delete_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "team_delete_response": {\n    "etat": "boolean",\n    "teamId": "string",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "team_delete_response": { "etat": true, "teamId": "..." } }' },
+  { id: 'm97', nom: 'team_leave_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "team_leave_request": {\n    "teamId": "string"\n  }\n}',
+    exemple: '{ "team_leave_request": { "teamId": "team-id..." } }' },
+  { id: 'm98', nom: 'team_leave_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "team_leave_response": {\n    "etat": "boolean",\n    "teamId": "string",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "team_leave_response": { "etat": true } }' },
+  { id: 'm99', nom: 'team_members_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "team_members_request": {\n    "teamId": "string"\n  }\n}',
+    exemple: '{ "team_members_request": { "teamId": "team-id..." } }' },
+  { id: 'm100', nom: 'team_members_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "team_members_response": {\n    "etat": "boolean",\n    "teamId": "string",\n    "members": "TeamMember[]",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{\n  "team_members_response": {\n    "etat": true,\n    "members": [{ "userId": "uuid...", "firstname": "Alice", "role": "admin" }]\n  }\n}' },
+  { id: 'm101', nom: 'team_add_member_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "team_add_member_request": {\n    "teamId": "string",\n    "userId": "string (ObjectId ou UUID)"\n  }\n}',
+    exemple: '{\n  "team_add_member_request": {\n    "teamId": "...",\n    "userId": "user-uuid..."\n  }\n}' },
+  { id: 'm102', nom: 'team_add_member_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "team_add_member_response": {\n    "etat": "boolean",\n    "teamId": "string",\n    "member": "TeamMember",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "team_add_member_response": { "etat": true, "member": { "role": "member" } } }' },
+  { id: 'm103', nom: 'team_remove_member_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "team_remove_member_request": {\n    "teamId": "string",\n    "userId": "string"\n  }\n}',
+    exemple: '{\n  "team_remove_member_request": {\n    "teamId": "...",\n    "userId": "user-uuid..."\n  }\n}' },
+  { id: 'm104', nom: 'team_remove_member_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "team_remove_member_response": {\n    "etat": "boolean",\n    "teamId": "string",\n    "userId": "string (UUID)",\n    "error": "string — si échec"\n  }\n}',
+    exemple: '{ "team_remove_member_response": { "etat": true } }' },
+  { id: 'm105', nom: 'all_teams_request', emis: 'CanalSocketio', recus: 'TeamsService',
+    structure: '{\n  "all_teams_request": {}\n  // Aucune donnée requise\n}',
+    exemple: '{ "all_teams_request": {} }' },
+  { id: 'm106', nom: 'all_teams_response', emis: 'TeamsService', recus: 'CanalSocketio',
+    structure: '{\n  "all_teams_response": {\n    "etat": "boolean",\n    "teams": "Array<{ _id, name, numberOfParticipants }>"\n  }\n}',
+    exemple: '{\n  "all_teams_response": {\n    "etat": true,\n    "teams": [{ "_id": "...", "name": "Infra", "numberOfParticipants": 5 }]\n  }\n}' },
+];
+
+// ════════════════════════════════════════════════════
+//  STATE (localStorage)
+// ════════════════════════════════════════════════════
+
+function loadData(key, defaults) {
+  try { const d = localStorage.getItem(key); return d ? JSON.parse(d) : defaults.map(x=>({...x})); }
+  catch { return defaults.map(x=>({...x})); }
+}
+function saveData(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+}
+
+let messages = loadData('vc_messages', DEFAULT_MESSAGES);
+let composants = loadData('vc_composants', DEFAULT_COMPOSANTS);
+
+let editingMsgId = null;
+let deletingMsgId = null;
+let editingCompId = null;
+let deletingCompId = null;
+let expandedRows = new Set();
+
+// ════════════════════════════════════════════════════
+//  PAGES
+// ════════════════════════════════════════════════════
+function showPage(p) {
+  document.getElementById('page-messages').style.display = p==='messages'?'block':'none';
+  document.getElementById('page-composants').style.display = p==='composants'?'block':'none';
+  document.getElementById('nav-messages').className = p==='messages'?'active':'';
+  document.getElementById('nav-composants').className = p==='composants'?'active':'';
+  document.getElementById('btn-add-msg').style.display = p==='messages'?'inline-flex':'none';
+  document.getElementById('btn-add-comp').style.display = p==='composants'?'inline-flex':'none';
+  if(p==='messages') renderMessages();
+  else renderComposants();
+}
+
+// ════════════════════════════════════════════════════
+//  RENDER MESSAGES
+// ════════════════════════════════════════════════════
+function getCompNames() {
+  return [...new Set(composants.map(c=>c.nom))].sort();
+}
+
+function renderMessages() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filterE = document.getElementById('filter-emis').value;
+  const filterR = document.getElementById('filter-recus').value;
+  const sort = document.getElementById('sort-select').value;
+
+  // Populate filters
+  const emitters = [...new Set(messages.map(m=>m.emis).filter(x=>x&&x!=='-'))].sort();
+  const receivers = [...new Set(messages.map(m=>m.recus).filter(x=>x&&x!=='-'))].sort();
+  repopulateSelect('filter-emis', emitters, filterE, 'Tous les émetteurs');
+  repopulateSelect('filter-recus', receivers, filterR, 'Tous les récepteurs');
+
+  let data = messages.filter(m => {
+    if(search && !m.nom.toLowerCase().includes(search)) return false;
+    if(filterE && m.emis !== filterE) return false;
+    if(filterR && m.recus !== filterR) return false;
+    return true;
+  });
+  if(sort === 'nom_asc') data.sort((a,b)=>a.nom.localeCompare(b.nom));
+  else data.sort((a,b)=>b.nom.localeCompare(a.nom));
+
+  document.getElementById('msg-count').textContent = `— ${data.length} message${data.length!==1?'s':''}`;
+  document.getElementById('msg-empty').style.display = data.length===0?'block':'none';
+
+  const tbody = document.getElementById('messages-tbody');
+  tbody.innerHTML = '';
+  data.forEach(m => {
+    const open = expandedRows.has(m.id);
+    const emisBadge = m.emis&&m.emis!=='-' ? `<span class="badge ${badgeClass(m.emis)}">${m.emis}</span>` : '<span class="badge badge-none">—</span>';
+    const recusBadge = m.recus&&m.recus!=='-' ? `<span class="badge ${badgeClass(m.recus)}">${m.recus}</span>` : '<span class="badge badge-none">—</span>';
+
+    const tr = document.createElement('tr');
+    tr.className = 'main-row' + (open?' expanded':'');
+    tr.innerHTML = `
+      <td>
+        <button class="row-toggle" onclick="toggleRow('${m.id}')">
+          <div class="toggle-icon">${open?'▼':'▶'}</div>
+          <span class="msg-name">${escHtml(m.nom)}</span>
+        </button>
+      </td>
+      <td><div class="badge-wrap">${emisBadge}</div></td>
+      <td><div class="badge-wrap">${recusBadge}</div></td>
+      <td><div class="actions-cell">
+        <button class="btn btn-sm btn-edit" onclick="openEditMsg('${m.id}')">Modifier</button>
+        <button class="btn btn-sm btn-delete" onclick="openDeleteMsg('${m.id}')">Supprimer</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+
+    const trDetail = document.createElement('tr');
+    trDetail.className = 'detail-row' + (open?' open':'');
+    trDetail.innerHTML = `<td colspan="4">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <label>Structure JSON</label>
+          <div class="code-block">${escHtml(m.structure||'(non défini)')}</div>
+        </div>
+        <div class="detail-section">
+          <label>Exemple</label>
+          <div class="code-block example">${escHtml(m.exemple||'(non défini)')}</div>
+        </div>
+      </div>
+    </td>`;
+    tbody.appendChild(trDetail);
+  });
+}
+
+function repopulateSelect(id, options, current, placeholder) {
+  const el = document.getElementById(id);
+  const val = current || el.value;
+  el.innerHTML = `<option value="">${placeholder}</option>` +
+    options.map(o=>`<option value="${escHtml(o)}"${val===o?' selected':''}>${escHtml(o)}</option>`).join('');
+}
+
+function badgeClass(comp) {
+  if(!comp||comp==='-') return 'badge-none';
+  const c = composants.find(x=>x.nom===comp);
+  if(!c) return 'badge-none';
+  if(c.type==='s') return 'badge-server';
+  if(c.type==='c') return 'badge-client';
+  return 'badge-none';
+}
+
+function toggleRow(id) {
+  if(expandedRows.has(id)) expandedRows.delete(id);
+  else expandedRows.add(id);
+  renderMessages();
+}
+
+// ════════════════════════════════════════════════════
+//  RENDER COMPOSANTS
+// ════════════════════════════════════════════════════
+function renderComposants() {
+  const search = document.getElementById('comp-search').value.toLowerCase();
+  const filterType = document.getElementById('filter-type').value;
+  let data = composants.filter(c => {
+    if(search && !c.nom.toLowerCase().includes(search) && !c.desc.toLowerCase().includes(search)) return false;
+    if(filterType && c.type !== filterType) return false;
+    return true;
+  });
+  document.getElementById('comp-count').textContent = `— ${data.length} composant${data.length!==1?'s':''}`;
+  document.getElementById('comp-empty').style.display = data.length===0?'block':'none';
+  const grid = document.getElementById('comp-grid');
+  grid.innerHTML = '';
+  data.forEach(c => {
+    const typeLbl = c.type==='s'?'Serveur':c.type==='c'?'Client':'Infra';
+    const typeClass = c.type==='s'?'type-server':c.type==='c'?'type-client':'type-infra';
+    const emits = messages.filter(m=>m.emis===c.nom).length;
+    const recvs = messages.filter(m=>m.recus===c.nom).length;
+    const div = document.createElement('div');
+    div.className = 'comp-card';
+    div.innerHTML = `
+      <div class="comp-card-header">
+        <span class="comp-name">${escHtml(c.nom)}</span>
+        <span class="type-badge ${typeClass}">${typeLbl}</span>
+      </div>
+      <div class="comp-desc">${escHtml(c.desc||'')}</div>
+      <div class="comp-stats">
+        <div class="stat">Émet <strong>${emits}</strong></div>
+        <div class="stat">Reçoit <strong>${recvs}</strong></div>
+      </div>
+      <div class="comp-actions">
+        <button class="btn btn-sm btn-edit" onclick="openEditComp('${c.id}')">Modifier</button>
+        <button class="btn btn-sm btn-delete" onclick="openDeleteComp('${c.id}')">Supprimer</button>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  MSG CRUD
+// ════════════════════════════════════════════════════
+function populateCompSelects() {
+  const names = ['-', ...getCompNames()];
+  ['f-emis','f-recus'].forEach(id => {
+    const el = document.getElementById(id);
+    const v = el.value;
+    el.innerHTML = names.map(n=>`<option value="${escHtml(n)}"${v===n?' selected':''}>${n==='-'?'—':escHtml(n)}</option>`).join('');
+  });
+}
+
+function openAddModal() {
+  editingMsgId = null;
+  document.getElementById('msg-modal-title').textContent = 'Ajouter un message';
+  document.getElementById('f-nom').value = '';
+  document.getElementById('f-structure').value = '';
+  document.getElementById('f-exemple').value = '';
+  populateCompSelects();
+  document.getElementById('f-emis').value = '-';
+  document.getElementById('f-recus').value = '-';
+  openModal('msg-modal');
+}
+
+function openEditMsg(id) {
+  const m = messages.find(x=>x.id===id);
+  if(!m) return;
+  editingMsgId = id;
+  document.getElementById('msg-modal-title').textContent = 'Modifier le message';
+  document.getElementById('f-nom').value = m.nom;
+  document.getElementById('f-structure').value = m.structure||'';
+  document.getElementById('f-exemple').value = m.exemple||'';
+  populateCompSelects();
+  document.getElementById('f-emis').value = m.emis||'-';
+  document.getElementById('f-recus').value = m.recus||'-';
+  openModal('msg-modal');
+}
+
+function saveMessage() {
+  const nom = document.getElementById('f-nom').value.trim();
+  if(!nom) { showToast('Le nom est obligatoire', 'error'); return; }
+  const obj = {
+    nom,
+    emis: document.getElementById('f-emis').value||'-',
+    recus: document.getElementById('f-recus').value||'-',
+    structure: document.getElementById('f-structure').value.trim(),
+    exemple: document.getElementById('f-exemple').value.trim(),
+  };
+  if(editingMsgId) {
+    const i = messages.findIndex(x=>x.id===editingMsgId);
+    messages[i] = { ...messages[i], ...obj };
+    showToast('Message mis à jour ✓', 'success');
+  } else {
+    obj.id = 'm' + Date.now();
+    messages.push(obj);
+    showToast('Message ajouté ✓', 'success');
+  }
+  saveData('vc_messages', messages);
+  closeModal('msg-modal');
+  renderMessages();
+}
+
+function openDeleteMsg(id) {
+  deletingMsgId = id;
+  const m = messages.find(x=>x.id===id);
+  document.getElementById('del-name').textContent = m?.nom||'ce message';
+  openModal('del-modal');
+}
+function confirmDelete() {
+  messages = messages.filter(x=>x.id!==deletingMsgId);
+  saveData('vc_messages', messages);
+  closeModal('del-modal');
+  showToast('Message supprimé', 'success');
+  renderMessages();
+}
+
+// ════════════════════════════════════════════════════
+//  COMP CRUD
+// ════════════════════════════════════════════════════
+function openAddCompModal() {
+  editingCompId = null;
+  document.getElementById('comp-modal-title').textContent = 'Ajouter un composant';
+  document.getElementById('fc-nom').value = '';
+  document.getElementById('fc-type').value = 's';
+  document.getElementById('fc-desc').value = '';
+  openModal('comp-modal');
+}
+
+function openEditComp(id) {
+  const c = composants.find(x=>x.id===id);
+  if(!c) return;
+  editingCompId = id;
+  document.getElementById('comp-modal-title').textContent = 'Modifier le composant';
+  document.getElementById('fc-nom').value = c.nom;
+  document.getElementById('fc-type').value = c.type;
+  document.getElementById('fc-desc').value = c.desc||'';
+  openModal('comp-modal');
+}
+
+function saveComposant() {
+  const nom = document.getElementById('fc-nom').value.trim();
+  if(!nom) { showToast('Le nom est obligatoire', 'error'); return; }
+  const obj = { nom, type: document.getElementById('fc-type').value, desc: document.getElementById('fc-desc').value.trim() };
+  if(editingCompId) {
+    const i = composants.findIndex(x=>x.id===editingCompId);
+    composants[i] = { ...composants[i], ...obj };
+    showToast('Composant mis à jour ✓', 'success');
+  } else {
+    obj.id = 'c' + Date.now();
+    composants.push(obj);
+    showToast('Composant ajouté ✓', 'success');
+  }
+  saveData('vc_composants', composants);
+  closeModal('comp-modal');
+  renderComposants();
+}
+
+function openDeleteComp(id) {
+  deletingCompId = id;
+  const c = composants.find(x=>x.id===id);
+  document.getElementById('del-comp-name').textContent = c?.nom||'ce composant';
+  openModal('del-comp-modal');
+}
+function confirmDeleteComp() {
+  composants = composants.filter(x=>x.id!==deletingCompId);
+  saveData('vc_composants', composants);
+  closeModal('del-comp-modal');
+  showToast('Composant supprimé', 'success');
+  renderComposants();
+}
+
+// ════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(el=>el.classList.remove('open'));
+});
+
+function escHtml(s) {
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg, type='success') {
+  const el = document.getElementById('toast');
+  const icon = type==='success'?'✓':'✕';
+  el.className = `toast ${type}`;
+  el.textContent = `${icon}  ${msg}`;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2800);
+}
+
+// ════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════
+renderMessages();
+</script>
+</body>
+</html>
