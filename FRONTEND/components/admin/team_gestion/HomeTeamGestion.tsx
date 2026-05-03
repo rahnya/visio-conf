@@ -1,5 +1,3 @@
-/*Author : Matthieu BIVILLE*/
-
 import { useAppContext } from "@/context/AppContext";
 import { useEffect, useState } from "react";
 import styles from "./TeamDisplay.module.css"

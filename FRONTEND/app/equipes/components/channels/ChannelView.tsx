@@ -48,6 +48,8 @@ export default function ChannelView({
         "channel_post_create_request",
         "channel_post_response_create_request",
         "channel_delete_request",
+        "channel_add_member_request",
+        "channel_remove_member_request",
     ]
     const listeMessageRecus = [
         "channel_posts_response",
@@ -55,6 +57,8 @@ export default function ChannelView({
         "channel_post_create_response",
         "channel_post_response_create_response",
         "channel_delete_response",
+        "channel_add_member_response", 
+        "channel_remove_member_response",
     ]
 
     // Assurons-nous que nous utilisons l'ID correct
@@ -231,7 +235,7 @@ export default function ChannelView({
 
     const isChannelCreator = channel.createdBy === userId
 
-    const canPostMessage = isChannelCreator // Seul le créateur peut créer des posts
+    const canPostMessage = true  // tous les membres peuvent écrire
 
     return (
         <div className={styles.container}>

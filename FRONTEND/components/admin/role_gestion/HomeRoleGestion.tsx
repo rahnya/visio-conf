@@ -1,5 +1,3 @@
-/*Author : Matthieu BIVILLE*/
-
 import { useAppContext } from "@/context/AppContext";
 import { useEffect, useState } from "react";
 import styles from "./RoleDisplay.module.css"
@@ -197,12 +195,18 @@ export default function HomeRoleGestion ({userPerms} : {userPerms : string[]}) {
             }
         })
     }
-      
+    const handleAddRole = () => {
+        if (userPerms.includes("admin_ajouter_role")) {
+            setSelectedRole(undefined)
+            setAddUpdateRole(true)
+        }
+    }
     if(!addUpdateRole){
         return (
             <>
             {userPerms.includes("admin_demande_liste_roles") ? (
                     <RoleListDisplay 
+                        handleAddRole={handleAddRole}
                         setAddUpdateRole={setAddUpdateRole}
                         regex={regex}
                         setRegex={setRegex}

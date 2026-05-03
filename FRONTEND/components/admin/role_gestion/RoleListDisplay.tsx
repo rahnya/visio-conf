@@ -2,17 +2,18 @@
 
 import styles from "./RoleDisplay.module.css"
 import { InputAdornment, TextField, Typography } from "@mui/material";
-import { Pencil, Search, Trash2 } from "lucide-react";
+import { Search } from "lucide-react";
 import { DataGrid } from "@mui/x-data-grid";
 import DeleteRole from "../../modals/DeleteRole";
 import CustomSnackBar from "../../SnackBar";
 import DuplicateRole from "@/components/modals/DuplicateRole";
 
 export default function RoleListDisplay ({
+    handleAddRole,       // ← était manquant dans la destructuration
     setAddUpdateRole,
     regex,
     setRegex,
-    rows, 
+    rows,
     columns,
     openDelete,
     setOpenDelete,
@@ -25,10 +26,11 @@ export default function RoleListDisplay ({
     setOpenAlert,
     userPerms
 } : {
+    handleAddRole : Function,
     setAddUpdateRole : Function,
     regex : string,
     setRegex : Function,
-    rows : any, 
+    rows : any,
     columns : any,
     openDelete : boolean,
     setOpenDelete : Function,
@@ -48,15 +50,13 @@ export default function RoleListDisplay ({
                     <img src="./icons/User_Friend.svg" alt="" className={styles.icon}/>
                     <Typography variant="subtitle1" className={styles.title} style={{fontSize: "32px", fontWeight: 700}}>Liste des rôles</Typography>
                 </div>
-                <button 
-                    onClick={() => {
-                        if(userPerms.includes("admin_ajouter_role")) setAddUpdateRole(true);
-                    }}
+                <button
+                    onClick={() => handleAddRole()}
                     style={{backgroundColor: userPerms.includes("admin_ajouter_role") ? "#223A6A" : "gray"}}
                     className={styles.addButton}
                 >+ Ajouter</button>
             </div>
-            <TextField 
+            <TextField
                 id="regex"
                 type="text"
                 name="regex"
@@ -73,16 +73,16 @@ export default function RoleListDisplay ({
                     )
                 }}
             />
-            <DataGrid 
-                rows={rows} 
-                columns={columns} 
+            <DataGrid
+                rows={rows}
+                columns={columns}
                 rowHeight={69}
                 getRowId={(row) => row.id}
                 columnHeaderHeight={69}
                 className={styles.table}
                 autoPageSize
                 disableRowSelectionOnClick
-                sx={{  
+                sx={{
                     height : "70%",
                     '& .MuiDataGrid-columnHeader': {
                         backgroundColor: '#EAEAEA',

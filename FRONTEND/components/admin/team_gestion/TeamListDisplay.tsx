@@ -1,5 +1,3 @@
-/*Author : Matthieu BIVILLE*/
-
 import styles from "./TeamDisplay.module.css"
 import { InputAdornment, TextField, Typography } from "@mui/material";
 import { Pencil, Search, Trash2 } from "lucide-react";
