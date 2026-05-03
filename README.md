@@ -155,7 +155,7 @@ PROFILE_PICTURES_URL=http://localhost:3220/api/files/profile
 
 ```bash
 # URL de l'API Backend
-NEXT_PUBLIC_API_URL=http://localhost:3220
+NEXT_PUBLIC_API_URL=https://visio-conf-26.onrender.com
 
 # URLs pour le stockage de fichiers
 NEXT_PUBLIC_FILE_STORAGE_URL=http://localhost:3220/api/files
